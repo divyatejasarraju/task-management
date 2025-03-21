@@ -1,0 +1,122 @@
+.holidays-page {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .holidays-header {
+    margin-bottom: 30px;
+  }
+  
+  .holidays-header h1 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+  }
+  
+  .holidays-description {
+    color: #666;
+    font-size: 16px;
+  }
+  
+  .holidays-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+  }
+  
+  .add-holiday-form {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .add-holiday-form h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+  
+  .add-holiday-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .add-holiday-form .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .add-holiday-form label {
+    font-weight: 500;
+    margin-bottom: 5px;
+  }
+  
+  .add-holiday-form input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .btn-add-holiday {
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 10px;
+  }
+  
+  .holidays-list {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .holidays-list h2 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+  
+  .holidays-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .holidays-table th,
+  .holidays-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .holidays-table th {
+    font-weight: 600;
+    color: #444;
+  }
+  
+  .btn-delete-holiday {
+    padding: 6px 12px;
+    background-color: #ffebee;
+    color: #d32f2f;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .holidays-loading,
+  .no-holidays {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+  }

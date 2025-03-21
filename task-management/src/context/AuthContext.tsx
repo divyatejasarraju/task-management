@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { AuthState, AuthContextType } from '../types';
 import axios from 'axios';
 
@@ -21,6 +21,7 @@ type AuthAction =
   | { type: 'REGISTER_REQUEST' }
   | { type: 'REGISTER_SUCCESS'; payload: { user: any; token: string } }
   | { type: 'REGISTER_FAILURE'; payload: string }
+  | { type: 'AUTH_RESET' }
   | { type: 'LOGOUT' };
 
 // Reducer
@@ -55,8 +56,16 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isLoading: false,
         error: action.payload,
       };
+    case 'AUTH_RESET':
+      return {
+        ...initialState,
+        token: null,
+        isAuthenticated: false,
+      };
     case 'LOGOUT':
       localStorage.removeItem('token');
+      // Clear any other stored state
+      sessionStorage.clear();
       return {
         ...state,
         user: null,
@@ -118,13 +127,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Reset auth state
+  const resetAuthState = useCallback(() => {
+    dispatch({ type: 'AUTH_RESET' });
+  }, []);
+
   // Logout user
-  const logout = () => {
+  const logout = useCallback(() => {
+    // First dispatch the logout action to clear auth state
     dispatch({ type: 'LOGOUT' });
-  };
+    
+    // Force page reload to ensure all state is cleared
+    window.location.href = '/';
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ authState, register, login, logout }}>
+    <AuthContext.Provider value={{ authState, register, login, logout, resetAuthState }}>
       {children}
     </AuthContext.Provider>
   );

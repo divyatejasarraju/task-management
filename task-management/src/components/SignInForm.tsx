@@ -1,19 +1,41 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const SignInForm = ({ switchToSignUp }: { switchToSignUp: () => void }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, authState } = useAuth();
+  const { login, authState, resetAuthState } = useAuth();
   const navigate = useNavigate();
+
+  // Reset form fields when component mounts or unmounts
+  useEffect(() => {
+    resetForm();
+    
+    // Cleanup function to reset fields when component unmounts
+    return () => {
+      resetForm();
+    };
+  }, []);
+
+  const resetForm = () => {
+    setEmail('');
+    setPassword('');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(email, password);
     if (authState.isAuthenticated) {
+      resetForm();
       navigate('/dashboard');
     }
+  };
+
+  const handleSwitchToSignUp = () => {
+    resetForm();
+    resetAuthState(); // Clear any auth errors
+    switchToSignUp();
   };
 
   return (
@@ -43,12 +65,16 @@ const SignInForm = ({ switchToSignUp }: { switchToSignUp: () => void }) => {
         </div>
         
         <p className="forgot-password">
-          Lost password? <span className="link">Click here!</span>
+          Don't have an account? <span className="link" onClick={handleSwitchToSignUp}>Sign up instead</span>
         </p>
         
         <div className="button-group">
-          <button type="submit" className="btn primary">Sign In</button>
-          <button type="button" className="btn secondary" onClick={switchToSignUp}>Sign Up</button>
+          <button type="submit" className="btn primary" disabled={authState.isLoading}>
+            {authState.isLoading ? 'Signing in...' : 'Sign In'}
+          </button>
+          <button type="button" className="btn secondary" onClick={handleSwitchToSignUp}>
+            Sign Up
+          </button>
         </div>
       </form>
       

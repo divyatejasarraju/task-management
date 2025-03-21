@@ -1,0 +1,36 @@
+.tasks-page {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  
+  .tasks-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .tasks-header h1 {
+    color: var(--primary-color);
+    margin: 0;
+  }
+  
+  .toggle-form-btn {
+    padding: 10px 20px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .toggle-form-btn.active {
+    background-color: #f44336;
+  }
+  
+  .new-task-section {
+    margin-bottom: 30px;
+  }

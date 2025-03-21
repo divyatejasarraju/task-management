@@ -1,0 +1,96 @@
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f5f7fa;
+}
+
+.app-content {
+  flex: 1;
+  padding: 40px; /* Increased padding all around */
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* Adjust spacing for page containers */
+.page-container {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 40px; /* Added bottom margin */
+}
+
+/* Add more breathing room to cards */
+.card {
+  padding: 30px; /* Increased internal padding */
+  margin-bottom: 30px; /* Increased spacing between cards */
+  border-radius: 10px; /* Slightly larger radius */
+}
+
+.card-header {
+  margin-bottom: 25px; /* More space after header */
+}
+
+/* More spacing in forms */
+.form-group {
+  margin-bottom: 25px; /* Increased spacing between form elements */
+}
+
+.form-group label {
+  margin-bottom: 10px; /* More space after labels */
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 14px; /* Larger input areas */
+}
+
+/* Table spacing improvements */
+.data-table th,
+.data-table td {
+  padding: 15px 20px; /* Increased cell padding */
+}
+
+/* More spacing for buttons */
+.btn {
+  padding: 12px 24px; /* Larger buttons */
+  font-size: 15px; /* Slightly larger text */
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Section spacing */
+.page-title {
+  margin-bottom: 30px; /* More space after page titles */
+}
+
+.section-header {
+  margin-bottom: 25px; /* More space after section headers */
+}
+
+/* Add more space in dashboard stats */
+.dashboard-stats {
+  gap: 25px; /* Increased gap between stat cards */
+  margin-bottom: 40px; /* More space after stats section */
+}
+
+.stat-card {
+  padding: 25px; /* More padding in stat cards */
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  .app-content {
+    padding: 30px 20px; /* Adjusted padding for mobile */
+  }
+  
+  .card {
+    padding: 20px;
+  }
+}

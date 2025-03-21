@@ -1,34 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
+import AuthLayout from '../components/layouts/AuthLayout';
 import SignUpForm from '../components/SignupForm';
 import SignInForm from '../components/SignInForm';
-import { TaskManagerLogo } from '../components/TaskManagerLogo';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
 import '../styles/AuthPage.css';
 
 const AuthPage = () => {
   const [isSignUp, setIsSignUp] = useState(true);
-  const { authState } = useAuth();
+  const { authState, resetAuthState } = useAuth();
+
+  // Reset auth state when component mounts
+  useEffect(() => {
+    // This will clear any previous auth errors and reset the state
+    resetAuthState();
+  }, [resetAuthState]);
 
   if (authState.isAuthenticated) {
     return <Navigate to="/dashboard" />;
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-left">
-        <TaskManagerLogo />
-        <h1>Task Manager</h1>
-        <h2></h2>
-      </div>
-      <div className="auth-right">
-        {isSignUp ? (
-          <SignUpForm switchToSignIn={() => setIsSignUp(false)} />
-        ) : (
-          <SignInForm switchToSignUp={() => setIsSignUp(true)} />
-        )}
-      </div>
-    </div>
+    <AuthLayout>
+      {isSignUp ? (
+        <SignUpForm key="signup-form" switchToSignIn={() => setIsSignUp(false)} />
+      ) : (
+        <SignInForm key="signin-form" switchToSignUp={() => setIsSignUp(true)} />
+      )}
+    </AuthLayout>
   );
 };
 

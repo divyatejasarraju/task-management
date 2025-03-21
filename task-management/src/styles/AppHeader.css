@@ -1,0 +1,132 @@
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px; /* Increased horizontal padding */
+  height: 80px; /* Increased height */
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 30px; /* Increased gap between back button and logo */
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+}
+
+.header-logo svg {
+  width: 38px; /* Increased logo size */
+  height: 38px;
+  margin-right: 16px; /* More space after logo */
+}
+
+.header-title {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 24px; /* Larger title font */
+  font-weight: 600;
+  letter-spacing: 0.3px; /* Added letter spacing for better readability */
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 16px; /* Larger font size */
+  font-weight: 500;
+  cursor: pointer;
+  padding: 10px 14px; /* Larger button area */
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 25px; /* Increased spacing */
+}
+
+.user-info {
+  text-align: right;
+  padding-right: 5px; /* Added padding */
+}
+
+.user-name {
+  display: block;
+  font-weight: 600;
+  font-size: 16px; /* Increased font size */
+  color: var(--text-color);
+  margin-bottom: 3px; /* Added space between name and role */
+}
+
+.user-role {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  text-transform: capitalize;
+}
+
+.logout-button {
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  padding: 10px 20px; /* Larger button */
+  border-radius: 6px;
+  font-size: 15px; /* Larger font size */
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logout-button:hover {
+  background-color: #3a1580;
+}
+
+/* Ensure content has appropriate spacing */
+.app-content {
+  padding-top: 40px; /* Increased top padding after header */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    height: auto;
+    padding: 20px;
+    gap: 15px;
+  }
+  
+  .header-left, .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .app-content {
+    padding-top: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 20px;
+  }
+  
+  .user-info {
+    display: none;
+  }
+}
