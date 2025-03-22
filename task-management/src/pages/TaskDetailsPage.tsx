@@ -14,23 +14,33 @@ const TaskDetailsPage = () => {
   const { taskState, getTaskById, markTaskCompleted, deleteTask } = useTask();
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
   
   useEffect(() => {
-    if (id) {
-      getTaskById(id);
-    }
+    const fetchTaskData = async () => {
+      if (id) {
+        await getTaskById(id);
+        // Add a small delay to ensure UI is stable
+        setTimeout(() => setIsLoaded(true), 100);
+      }
+    };
+    
+    fetchTaskData();
   }, [id]);
   
   const handleToggleComplete = async () => {
     if (taskState.task) {
+      setIsLoaded(false);
       await markTaskCompleted(id!, !taskState.task.completed);
       // Refresh task data
-      getTaskById(id!);
+      await getTaskById(id!);
+      setIsLoaded(true);
     }
   };
   
   const handleDeleteTask = async () => {
     if (isConfirmingDelete) {
+      setIsLoaded(false);
       await deleteTask(id!);
       navigate('/tasks');
     } else {
@@ -38,130 +48,166 @@ const TaskDetailsPage = () => {
     }
   };
   
-  const handleTaskSaved = () => {
+  const handleTaskSaved = async () => {
     setIsEditing(false);
+    setIsLoaded(false);
     // Refresh task data
-    getTaskById(id!);
+    await getTaskById(id!);
+    setIsLoaded(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsConfirmingDelete(false);
   };
   
-  if (taskState.loading) {
-    return (
-      <AppLayout title="Task Details">
-        <div className="loading-container">Loading task details...</div>
-      </AppLayout>
-    );
-  }
-  
-  if (taskState.error) {
-    return (
-      <AppLayout title="Task Details">
-        <div className="error-container">{taskState.error}</div>
-      </AppLayout>
-    );
-  }
-  
-  if (!taskState.task) {
-    return (
-      <AppLayout title="Task Details">
-        <div className="not-found-container">Task not found</div>
-      </AppLayout>
-    );
-  }
-  
-  const { task } = taskState;
-  const pageTitle = isEditing ? "Edit Task" : `Task: ${task.title}`;
-  
-  // Format due date
-  const formattedDueDate = format(new Date(task.dueDate), 'MMMM dd, yyyy');
-  
-  // Check if task is overdue
-  const isOverdue = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const dueDate = new Date(task.dueDate);
-    dueDate.setHours(0, 0, 0, 0);
-    return !task.completed && dueDate < today;
+  const renderContent = () => {
+    if (taskState.loading || !isLoaded) {
+      return <div className="task-loading-container">
+        <div className="task-loading-spinner"></div>
+        <p>Loading task details...</p>
+      </div>;
+    }
+    
+    if (taskState.error) {
+      return <div className="task-error-container">
+        <div className="task-error-icon">!</div>
+        <p>{taskState.error}</p>
+      </div>;
+    }
+    
+    if (!taskState.task) {
+      return <div className="task-not-found-container">
+        <div className="task-not-found-icon">?</div>
+        <p>Task not found</p>
+        <button 
+          className="btn btn-primary mt-20" 
+          onClick={() => navigate('/tasks')}
+        >
+          Back to Tasks
+        </button>
+      </div>;
+    }
+    
+    return renderTaskDetails();
   };
   
-  return (
-    <AppLayout title={pageTitle}>
-      <div className="page-container">
-        {!isEditing && (
-          <div className="task-actions mb-30 flex gap-10">
-            <button className="btn btn-primary" onClick={() => setIsEditing(true)}>
-              Edit Task
-            </button>
-            
+  const renderTaskDetails = () => {
+    if (!taskState.task) return null;
+    
+    const { task } = taskState;
+    
+    // Format due date
+    const formattedDueDate = format(new Date(task.dueDate), 'MMMM dd, yyyy');
+    const formattedCreatedDate = format(new Date(task.createdAt), 'MMMM dd, yyyy');
+    
+    // Check if task is overdue
+    const isOverdue = () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const dueDate = new Date(task.dueDate);
+      dueDate.setHours(0, 0, 0, 0);
+      return !task.completed && dueDate < today;
+    };
+    
+    return (
+      <>
+        <div className="task-action-buttons">
+          <button 
+            className="task-action-btn edit-btn" 
+            onClick={() => setIsEditing(true)}
+            disabled={isEditing}
+          >
+            Edit Task
+          </button>
+          
+          <button
+            className={`task-action-btn ${task.completed ? 'incomplete-btn' : 'complete-btn'}`}
+            onClick={handleToggleComplete}
+            disabled={isEditing}
+          >
+            {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
+          </button>
+          
+          <button
+            className={`task-action-btn ${isConfirmingDelete ? 'confirm-delete-btn' : 'delete-btn'}`}
+            onClick={handleDeleteTask}
+            disabled={isEditing}
+          >
+            {isConfirmingDelete ? 'Confirm Delete' : 'Delete Task'}
+          </button>
+          
+          {isConfirmingDelete && (
             <button
-              className={`btn ${task.completed ? 'btn-secondary' : 'btn-success'}`}
-              onClick={handleToggleComplete}
+              className="task-action-btn cancel-btn"
+              onClick={handleCancelDelete}
+              disabled={isEditing}
             >
-              {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
+              Cancel
             </button>
-            
-            <button
-              className={`btn ${isConfirmingDelete ? 'btn-danger' : 'btn-secondary'}`}
-              onClick={handleDeleteTask}
-            >
-              {isConfirmingDelete ? 'Confirm Delete' : 'Delete Task'}
-            </button>
-            
-            {isConfirmingDelete && (
-              <button
-                className="btn btn-secondary"
-                onClick={() => setIsConfirmingDelete(false)}
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
         
-        <div className="card mb-30">
+        <div className="task-detail-card">
           {isEditing ? (
-            <HolidayProvider>
-              <TaskForm taskId={id} onTaskSaved={handleTaskSaved} />
-            </HolidayProvider>
+            <div className="task-edit-container">
+              <HolidayProvider>
+                <TaskForm taskId={id} onTaskSaved={handleTaskSaved} />
+              </HolidayProvider>
+            </div>
           ) : (
-            <div className="task-detail-view">
-              <div className={`task-status ${task.completed ? 'completed' : ''} ${isOverdue() ? 'overdue' : ''}`}>
-                {task.completed ? 'COMPLETED' : isOverdue() ? 'OVERDUE' : 'IN PROGRESS'}
+            <div className="task-detail-content">
+              <div className="task-header">
+                <div className={`task-status-badge ${task.completed ? 'completed' : ''} ${isOverdue() ? 'overdue' : ''}`}>
+                  {task.completed ? 'COMPLETED' : isOverdue() ? 'OVERDUE' : 'IN PROGRESS'}
+                </div>
+                <h1 className="task-detail-title">{task.title}</h1>
               </div>
               
-              <h1 className="task-title">{task.title}</h1>
-              
-              <div className="task-info">
-                <div className="info-item">
-                  <span className="info-label">Priority:</span>
-                  <span className={`priority-badge ${task.priority.toLowerCase()}`}>
+              <div className="task-info-grid">
+                <div className="task-info-item">
+                  <div className="info-label">Priority</div>
+                  <div className={`priority-tag ${task.priority.toLowerCase()}`}>
                     {task.priority}
-                  </span>
+                  </div>
                 </div>
                 
-                <div className="info-item">
-                  <span className="info-label">Due Date:</span>
-                  <span className="due-date">{formattedDueDate}</span>
+                <div className="task-info-item">
+                  <div className="info-label">Due Date</div>
+                  <div className="info-value">{formattedDueDate}</div>
                 </div>
                 
-                <div className="info-item">
-                  <span className="info-label">Created:</span>
-                  <span className="created-date">{format(new Date(task.createdAt), 'MMMM dd, yyyy')}</span>
+                <div className="task-info-item">
+                  <div className="info-label">Created</div>
+                  <div className="info-value">{formattedCreatedDate}</div>
                 </div>
               </div>
               
               {task.description && (
-                <div className="task-description">
-                  <h3>Description</h3>
-                  <p>{task.description}</p>
+                <div className="task-description-section">
+                  <h3 className="section-title">Description</h3>
+                  <div className="task-description-content">{task.description}</div>
                 </div>
               )}
             </div>
           )}
         </div>
         
-        <div className="card">
+        <div className="task-history-card">
           <TaskHistory taskId={id!} />
         </div>
+      </>
+    );
+  };
+  
+  // Determine page title dynamically
+  const pageTitle = taskState.task 
+    ? (isEditing ? "Edit Task" : `Task: ${taskState.task.title}`)
+    : "Task Details";
+  
+  return (
+    <AppLayout title={pageTitle}>
+      <div className="task-detail-page">
+        {renderContent()}
       </div>
     </AppLayout>
   );

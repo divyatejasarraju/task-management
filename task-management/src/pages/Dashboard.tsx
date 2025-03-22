@@ -106,15 +106,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div className="dashboard-actions">
-          <Link to="/tasks" className="dashboard-button primary">
-            View All Tasks
-          </Link>
-          <Link to="/tasks" className="dashboard-button secondary">
-            Create New Task
-          </Link>
-        </div>
-
         <div className="recent-tasks-container">
           <div className="recent-header">
             <h2>Recent Tasks</h2>

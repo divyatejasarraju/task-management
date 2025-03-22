@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import AppLayout from '../components/layouts/AppLayout';
 import TaskForm from '../components/TaskForm';
@@ -8,6 +8,8 @@ import { useHoliday } from '../context/HolidayContext';
 import '../styles/TasksPage.css';
 
 const TasksPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [isShowingNewTaskForm, setIsShowingNewTaskForm] = useState(false);
   const [priority, setPriority] = useState('');
   const [completionStatus, setCompletionStatus] = useState('all');
@@ -16,6 +18,14 @@ const TasksPage = () => {
   
   const { taskState, getTasks, markTaskCompleted, deleteTask } = useTask();
   const { getHolidays } = useHoliday();
+  
+  // Check if we should show the form based on URL parameter
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const showForm = queryParams.get('showForm') === 'true';
+    
+    setIsShowingNewTaskForm(showForm);
+  }, [location.search]);
   
   // Load holidays on component mount
   useEffect(() => {
@@ -56,12 +66,9 @@ const TasksPage = () => {
     await getTasks(filters);
   };
   
-  const toggleNewTaskForm = () => {
-    setIsShowingNewTaskForm(!isShowingNewTaskForm);
-  };
-  
   const handleTaskSaved = () => {
-    setIsShowingNewTaskForm(false);
+    // After task is saved, navigate to tasks without the query param
+    navigate('/tasks', { replace: true });
     fetchTasks();
   };
   
@@ -94,13 +101,6 @@ const TasksPage = () => {
   return (
     <AppLayout title="Task Management">
       <div className="tasks-page">
-        <div className="section-header">
-          <h2>Your Tasks</h2>
-          <button className="new-task-btn" onClick={toggleNewTaskForm}>
-            New Task
-          </button>
-        </div>
-        
         {isShowingNewTaskForm ? (
           <div className="task-form-container">
             <TaskForm onTaskSaved={handleTaskSaved} />
