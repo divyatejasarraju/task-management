@@ -41,7 +41,6 @@ function AppRoutes() {
 
   return (
     <>
-    {console.log(authState)}
     <div className="app-wrapper">
      
       <Routes>

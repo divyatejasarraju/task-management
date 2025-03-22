@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTask } from '../context/TaskContext';
 import { HolidayProvider } from '../context/HolidayContext';
@@ -15,45 +15,78 @@ const TaskDetailsPage = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [cachedTask, setCachedTask] = useState(null);
+  const [fetchedInitially, setFetchedInitially] = useState(false);
   
-  useEffect(() => {
-    const fetchTaskData = async () => {
-      if (id) {
+  // Only fetch task data on initial load and after operations (not during edits)
+  const fetchTaskData = useCallback(async () => {
+    if (id) {
+      try {
+        setIsLoaded(false);
         await getTaskById(id);
         // Add a small delay to ensure UI is stable
         setTimeout(() => setIsLoaded(true), 100);
+      } catch (error) {
+        console.error("Error fetching task data:", error);
+        setIsLoaded(true); // Still mark as loaded to show error state
       }
-    };
-    
-    fetchTaskData();
-  }, [id]);
+    }
+  }, [id, getTaskById]);
+  
+  // Initial data fetch - only runs once
+  useEffect(() => {
+    if (!fetchedInitially && id) {
+      fetchTaskData();
+      setFetchedInitially(true);
+    }
+  }, [id, fetchTaskData, fetchedInitially]);
+  
+  // Cache the task data when it's available
+  useEffect(() => {
+    if (taskState.task && !isEditing) {
+      setCachedTask(taskState.task);
+    }
+  }, [taskState.task, isEditing]);
   
   const handleToggleComplete = async () => {
     if (taskState.task) {
-      setIsLoaded(false);
-      await markTaskCompleted(id!, !taskState.task.completed);
-      // Refresh task data
-      await getTaskById(id!);
-      setIsLoaded(true);
+      try {
+        setIsLoaded(false);
+        await markTaskCompleted(id!, !taskState.task.completed);
+        // Refresh task data
+        await getTaskById(id!);
+        setIsLoaded(true);
+      } catch (error) {
+        console.error("Error toggling task completion:", error);
+        setIsLoaded(true);
+      }
     }
   };
   
   const handleDeleteTask = async () => {
     if (isConfirmingDelete) {
-      setIsLoaded(false);
-      await deleteTask(id!);
-      navigate('/tasks');
+      try {
+        setIsLoaded(false);
+        await deleteTask(id!);
+        navigate('/tasks');
+      } catch (error) {
+        console.error("Error deleting task:", error);
+        setIsLoaded(true);
+      }
     } else {
       setIsConfirmingDelete(true);
     }
   };
   
+  // Edit button handler - just switch to edit mode without API calls
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+  
   const handleTaskSaved = async () => {
     setIsEditing(false);
-    setIsLoaded(false);
-    // Refresh task data
-    await getTaskById(id!);
-    setIsLoaded(true);
+    // Only after saving do we need to refresh the data
+    fetchTaskData();
   };
 
   const handleCancelDelete = () => {
@@ -61,21 +94,24 @@ const TaskDetailsPage = () => {
   };
   
   const renderContent = () => {
-    if (taskState.loading || !isLoaded) {
+    // Use cached task to prevent flashes during transitions
+    const currentTask = taskState.task || cachedTask;
+    
+    if ((taskState.loading || !isLoaded) && !currentTask) {
       return <div className="task-loading-container">
         <div className="task-loading-spinner"></div>
         <p>Loading task details...</p>
       </div>;
     }
     
-    if (taskState.error) {
+    if (taskState.error && !currentTask) {
       return <div className="task-error-container">
         <div className="task-error-icon">!</div>
         <p>{taskState.error}</p>
       </div>;
     }
     
-    if (!taskState.task) {
+    if (!currentTask) {
       return <div className="task-not-found-container">
         <div className="task-not-found-icon">?</div>
         <p>Task not found</p>
@@ -88,13 +124,11 @@ const TaskDetailsPage = () => {
       </div>;
     }
     
-    return renderTaskDetails();
+    return renderTaskDetails(currentTask);
   };
   
-  const renderTaskDetails = () => {
-    if (!taskState.task) return null;
-    
-    const { task } = taskState;
+  const renderTaskDetails = (task) => {
+    if (!task) return null;
     
     // Format due date
     const formattedDueDate = format(new Date(task.dueDate), 'MMMM dd, yyyy');
@@ -110,11 +144,11 @@ const TaskDetailsPage = () => {
     };
     
     return (
-      <>
+      <div className={`task-details-wrapper ${(taskState.loading || !isLoaded) && !isEditing ? 'loading-state' : ''}`}>
         <div className="task-action-buttons">
           <button 
             className="task-action-btn edit-btn" 
-            onClick={() => setIsEditing(true)}
+            onClick={handleEditClick}
             disabled={isEditing}
           >
             Edit Task
@@ -151,7 +185,7 @@ const TaskDetailsPage = () => {
           {isEditing ? (
             <div className="task-edit-container">
               <HolidayProvider>
-                <TaskForm taskId={id} onTaskSaved={handleTaskSaved} />
+                <TaskForm taskId={id} onTaskSaved={handleTaskSaved} initialData={task} />
               </HolidayProvider>
             </div>
           ) : (
@@ -195,13 +229,14 @@ const TaskDetailsPage = () => {
         <div className="task-history-card">
           <TaskHistory taskId={id!} />
         </div>
-      </>
+      </div>
     );
   };
   
-  // Determine page title dynamically
-  const pageTitle = taskState.task 
-    ? (isEditing ? "Edit Task" : `Task: ${taskState.task.title}`)
+  // Determine page title dynamically using cached task if needed
+  const currentTask = taskState.task || cachedTask;
+  const pageTitle = currentTask 
+    ? (isEditing ? "Edit Task" : `Task: ${currentTask.title}`)
     : "Task Details";
   
   return (

@@ -1,208 +1,257 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useTask } from '../context/TaskContext';
 import { useHoliday } from '../context/HolidayContext';
-import { format } from 'date-fns';
+import { format, isWeekend, addDays } from 'date-fns';
 import '../styles/TaskForm.css';
 
 interface TaskFormProps {
   taskId?: string;
-  onTaskSaved?: () => void;
+  onTaskSaved: () => void;
+  initialData?: any;
 }
 
-const TaskForm = ({ taskId, onTaskSaved }: TaskFormProps) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState<'Low' | 'Medium' | 'High'>('Medium');
-  const [dueDate, setDueDate] = useState('');
-  const [formError, setFormError] = useState('');
+const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
+  const { taskState, createTask, updateTask, getTaskById } = useTask();
+  const { holidayState, getHolidays } = useHoliday();
   
-  const { taskState, createTask, getTaskById, updateTask } = useTask();
-  const { getHolidays, isHoliday } = useHoliday();
+  // Initialize form with initialData if provided
+  const [formData, setFormData] = useState({
+    title: initialData?.title || '',
+    description: initialData?.description || '',
+    priority: initialData?.priority || 'Medium',
+    dueDate: initialData?.dueDate ? new Date(initialData.dueDate).toISOString().split('T')[0] : '',
+  });
   
-  // Fetch holidays when component mounts
+  const [formErrors, setFormErrors] = useState({
+    title: '',
+    dueDate: ''
+  });
+  
+  const [dateWarning, setDateWarning] = useState('');
+  
+  // Only fetch task data if editing and no initialData provided
   useEffect(() => {
-    getHolidays();
-  }, []);
-  
-  // If taskId is provided, fetch task data
-  useEffect(() => {
-    if (taskId) {
+    if (taskId && !initialData) {
       getTaskById(taskId);
     }
-  }, [taskId]);
+    
+    // Always fetch holidays for date validation
+    getHolidays();
+  }, [taskId, initialData]);
   
-  // Populate form with task data when available
+  // Set form data from existing task when editing (only if initialData not provided)
   useEffect(() => {
-    if (taskId && taskState.task) {
-      setTitle(taskState.task.title);
-      setDescription(taskState.task.description || '');
-      setPriority(taskState.task.priority);
-      setDueDate(format(new Date(taskState.task.dueDate), 'yyyy-MM-dd'));
+    if (taskId && taskState.task && !initialData) {
+      const task = taskState.task;
+      setFormData({
+        title: task.title,
+        description: task.description || '',
+        priority: task.priority,
+        dueDate: format(new Date(task.dueDate), 'yyyy-MM-dd')
+      });
     }
-  }, [taskId, taskState.task]);
+  }, [taskId, taskState.task, initialData]);
   
   const validateForm = (): boolean => {
-    // Reset error
-    setFormError('');
+    let isValid = true;
+    const errors = {
+      title: '',
+      dueDate: ''
+    };
     
-    // Check required fields
-    if (!title.trim()) {
-      setFormError('Title is required');
-      return false;
+    // Validate title
+    if (!formData.title.trim()) {
+      errors.title = 'Title is required';
+      isValid = false;
     }
     
-    if (!dueDate) {
-      setFormError('Due date is required');
-      return false;
+    // Validate due date
+    if (!formData.dueDate) {
+      errors.dueDate = 'Due date is required';
+      isValid = false;
     }
     
-    // Check if due date is a holiday
-    const dueDateObj = new Date(dueDate);
-    if (isHoliday(dueDateObj)) {
-      setFormError('Cannot set due date to a public holiday');
-      return false;
-    }
-    
-    // Check if due date is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    dueDateObj.setHours(0, 0, 0, 0);
-    
-    if (dueDateObj < today) {
-      setFormError('Due date cannot be in the past');
-      return false;
-    }
-    
-    return true;
+    setFormErrors(errors);
+    return isValid;
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
+  const checkDateWarnings = (date: string) => {
+    const selectedDate = new Date(date);
+    let warning = '';
+    
+    // Check if date is a weekend
+    if (isWeekend(selectedDate)) {
+      warning = 'Selected date falls on a weekend.';
+    }
+    
+    // Check if date is a holiday
+    const isHoliday = holidayState.holidays.some(holiday => {
+      const holidayDate = new Date(holiday.date);
+      return (
+        holidayDate.getDate() === selectedDate.getDate() &&
+        holidayDate.getMonth() === selectedDate.getMonth() &&
+        holidayDate.getFullYear() === selectedDate.getFullYear()
+      );
+    });
+    
+    if (isHoliday) {
+      warning = warning 
+        ? `${warning} This date is also a holiday.` 
+        : 'Selected date is a holiday.';
+    }
+    
+    setDateWarning(warning);
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear errors when user types
+    if (formErrors[name as keyof typeof formErrors]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+    
+    // Check for date warnings
+    if (name === 'dueDate' && value) {
+      checkDateWarnings(value);
+    }
+  };
+  
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
     
-    const taskData = {
-      title,
-      description,
-      priority,
-      dueDate: new Date(dueDate).toISOString()
-    };
-    
     try {
       if (taskId) {
         // Update existing task
-        await updateTask(taskId, taskData);
+        await updateTask(taskId, formData);
       } else {
         // Create new task
-        await createTask(taskData);
+        await createTask(formData);
       }
       
-      // Clear form on success
-      if (!taskId) {
-        setTitle('');
-        setDescription('');
-        setPriority('Medium');
-        setDueDate('');
-      }
-      
-      // Notify parent component
-      if (onTaskSaved) {
-        onTaskSaved();
-      }
+      onTaskSaved();
     } catch (error) {
       console.error('Error saving task:', error);
     }
   };
   
-  // Display holidays warning
-  const renderHolidayWarning = () => {
-    if (dueDate && isHoliday(new Date(dueDate))) {
-      return (
-        <div className="holiday-warning">
-          ⚠️ Selected date is a public holiday. Tasks cannot be scheduled on holidays.
-        </div>
-      );
+  const handleSuggestNextWorkday = () => {
+    let nextWorkday = new Date();
+    nextWorkday = addDays(nextWorkday, 1);
+    
+    // Find the next non-weekend day
+    while (isWeekend(nextWorkday)) {
+      nextWorkday = addDays(nextWorkday, 1);
     }
-    return null;
+    
+    // Format for input
+    const formattedDate = format(nextWorkday, 'yyyy-MM-dd');
+    
+    setFormData(prev => ({
+      ...prev,
+      dueDate: formattedDate
+    }));
+    
+    checkDateWarnings(formattedDate);
   };
   
   return (
-    <div className="task-form-container">
-      <h2>{taskId ? 'Edit Task' : 'Create New Task'}</h2>
+    <div className="task-form">
+      <h2 className="form-title">{taskId ? 'Edit Task' : 'Create New Task'}</h2>
       
-      <form onSubmit={handleSubmit} className="task-form">
+      <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="title">Title*</label>
+          <label htmlFor="title">Task Title *</label>
           <input
             type="text"
             id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Enter task title"
-            required
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+            className={formErrors.title ? 'error' : ''}
           />
+          {formErrors.title && <span className="error-message">{formErrors.title}</span>}
         </div>
         
         <div className="form-group">
           <label htmlFor="description">Description</label>
           <textarea
             id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter task description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
             rows={4}
           />
         </div>
         
-        <div className="form-group">
-          <label htmlFor="priority">Priority</label>
-          <select
-            id="priority"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as 'Low' | 'Medium' | 'High')}
-          >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
+        <div className="form-row">
+          <div className="form-group">
+            <label htmlFor="priority">Priority</label>
+            <select
+              id="priority"
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="dueDate">Due Date *</label>
+            <div className="date-input-group">
+              <input
+                type="date"
+                id="dueDate"
+                name="dueDate"
+                value={formData.dueDate}
+                onChange={handleChange}
+                className={formErrors.dueDate ? 'error' : ''}
+              />
+              <button 
+                type="button" 
+                className="suggest-date-btn"
+                onClick={handleSuggestNextWorkday}
+              >
+                Suggest Next Workday
+              </button>
+            </div>
+            {formErrors.dueDate && <span className="error-message">{formErrors.dueDate}</span>}
+            {dateWarning && <span className="warning-message">{dateWarning}</span>}
+          </div>
         </div>
-        
-        <div className="form-group">
-          <label htmlFor="dueDate">Due Date*</label>
-          <input
-            type="date"
-            id="dueDate"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            min={format(new Date(), 'yyyy-MM-dd')}
-            required
-          />
-          {renderHolidayWarning()}
-        </div>
-        
-        {formError && <div className="form-error">{formError}</div>}
-        {taskState.error && <div className="form-error">{taskState.error}</div>}
         
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn primary"
+          <button 
+            type="submit" 
+            className="save-btn"
             disabled={taskState.loading}
           >
-            {taskState.loading ? 'Saving...' : taskId ? 'Update Task' : 'Create Task'}
+            {taskState.loading ? 'Saving...' : 'Save Task'}
           </button>
           
-          {taskId && (
-            <button
-              type="button"
-              className="btn secondary"
-              onClick={() => onTaskSaved && onTaskSaved()}
-            >
-              Cancel
-            </button>
-          )}
+          <button 
+            type="button" 
+            className="cancel-btn"
+            onClick={onTaskSaved}
+            disabled={taskState.loading}
+          >
+            Cancel
+          </button>
         </div>
       </form>
     </div>
