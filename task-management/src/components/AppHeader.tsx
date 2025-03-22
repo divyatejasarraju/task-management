@@ -21,6 +21,8 @@ const AppHeader = ({
   const { resetTaskState } = useTask();
   const { resetHolidayState } = useHoliday();
   
+  const isAdmin = authState.user?.role === 'admin' || authState.user?.role === 'validator';
+  
   const handleLogout = () => {
     // Clear all application state before logout
     resetTaskState();
@@ -51,12 +53,24 @@ const AppHeader = ({
         </div>
       </div>
       
+      <nav className="header-nav">
+        <ul>
+          <li><button className="nav-link" onClick={() => navigate('/dashboard')}>Dashboard</button></li>
+          <li><button className="nav-link" onClick={() => navigate('/tasks')}>Tasks</button></li>
+          {isAdmin && (
+            <li><button className="nav-link" onClick={() => navigate('/holidays')}>Holidays</button></li>
+          )}
+        </ul>
+      </nav>
+      
       <div className="header-right">
         {authState.isAuthenticated && (
           <>
             <div className="user-info">
               <span className="user-name">{authState.user?.name}</span>
-              <span className="user-role">{authState.user?.role}</span>
+              <span className={`user-role role-${authState.user?.role}`}>
+                {authState.user?.role}
+              </span>
             </div>
             
             <button className="logout-button" onClick={handleLogout}>

@@ -48,19 +48,19 @@ body {
   width: 100%;
 }
 
-/* Remove existing headers from pages */
+
 .task-details-header {
   display: none;
 }
 
-/* Update task details actions */
+
 .task-details-actions {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-/* Responsive adjustments */
+
 @media (max-width: 768px) {
   .app-container > *:not(.app-header) {
     padding: 0 15px;
@@ -83,7 +83,7 @@ body {
   min-height: 100vh;
 }
 
-/* Standardized card styling */
+
 .card {
   background-color: #fff;
   border-radius: 8px;
@@ -106,7 +106,7 @@ body {
   margin: 0;
 }
 
-/* Standardized button styles */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -157,7 +157,7 @@ body {
   background-color: #388e3c;
 }
 
-/* Page title styling */
+
 .page-title {
   font-size: 24px;
   color: var(--text-color);
@@ -165,12 +165,12 @@ body {
   font-weight: 600;
 }
 
-/* Container for page content */
+
 .page-container {
   width: 100%;
 }
 
-/* Flex layout utilities */
+
 .flex {
   display: flex;
 }
@@ -195,7 +195,7 @@ body {
   gap: 20px;
 }
 
-/* Margin utilities */
+
 .mb-10 {
   margin-bottom: 10px;
 }
@@ -227,7 +227,7 @@ body {
   width: 100%;
 }
 
-/* Additional full-width fixes */
+
 .dashboard-container,
 .tasks-page,
 .task-details-page,
@@ -236,7 +236,7 @@ body {
   max-width: 100%;
 }
 
-/* Card and container fixes */
+
 .card {
   width: 100%;
   box-sizing: border-box;
@@ -250,19 +250,19 @@ body {
   margin-bottom: 30px;
 }
 
-/* Table container fix */
+
 .tasks-table-container,
 .holidays-table-container {
   width: 100%;
   overflow-x: auto;
 }
 
-/* Task list fixes */
+
 .task-list-container {
   width: 100%;
 }
 
-/* Form container fixes */
+
 .task-form-container {
   width: 100%;
 }

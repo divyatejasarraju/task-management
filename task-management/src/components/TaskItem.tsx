@@ -35,7 +35,7 @@ const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
     onTaskUpdated();
   };
   
-  // Check if user is admin or validator
+  // Check if user is admin or validator or task owner
   const canDelete = authState.user?.role === 'admin' || 
                    authState.user?.role === 'validator' || 
                    task.user === authState.user?.id;
@@ -110,6 +110,7 @@ const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
           </button>
         )}
         
+        {/* Only show delete button if user has permission */}
         {canDelete && (
           <button 
             className={`btn-delete ${isConfirmingDelete ? 'confirming' : ''}`}

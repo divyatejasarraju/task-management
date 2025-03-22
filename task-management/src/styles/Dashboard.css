@@ -1,77 +1,5 @@
 .dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.dashboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 30px;
-}
-
-.dashboard-logo {
-  display: flex;
-  align-items: center;
-}
-
-.dashboard-logo svg {
-  width: 40px;
-  height: 40px;
-  margin-right: 15px;
-}
-
-.dashboard-logo h1 {
-  color: var(--primary-color);
-  margin: 0;
-  font-size: 28px;
-}
-
-.user-actions {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.user-info {
-  text-align: right;
-}
-
-.user-name {
-  display: block;
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text-color);
-}
-
-.user-role {
-  display: block;
-  font-size: 14px;
-  color: #666;
-  text-transform: capitalize;
-}
-
-.logout-btn {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: background-color 0.3s;
-}
-
-.logout-btn:hover {
-  background-color: #3a1580;
-}
-
-.dashboard-content {
-  padding: 20px 0;
+  width: 100%;
 }
 
 .dashboard-welcome {
@@ -79,18 +7,17 @@
 }
 
 .dashboard-welcome h2 {
-  margin: 0 0 10px 0;
-  color: var(--text-color);
   font-size: 24px;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .dashboard-welcome p {
-  margin: 0;
   color: #666;
   font-size: 16px;
 }
 
-.dashboard-stats {
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
@@ -98,29 +25,31 @@
 }
 
 .stat-card {
-  background-color: #fff;
+  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   text-align: center;
-  transition: transform 0.3s;
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card h3 {
-  margin: 0 0 15px 0;
-  color: var(--primary-color);
+  color: #4c18a4;
   font-size: 16px;
+  margin-top: 0;
+  margin-bottom: 15px;
   font-weight: 600;
 }
 
 .stat-value {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
-  color: var(--text-color);
+  color: #333;
 }
 
 .stat-percentage {
@@ -130,7 +59,7 @@
 }
 
 .stat-card.overdue .stat-value {
-  color: #d32f2f;
+  color: #e53935;
 }
 
 .dashboard-actions {
@@ -141,68 +70,70 @@
 
 .dashboard-button {
   padding: 12px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 6px;
+  font-weight: 500;
   text-decoration: none;
-  cursor: pointer;
   text-align: center;
-  transition: all 0.3s;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
 .dashboard-button.primary {
-  background-color: var(--primary-color);
-  color: var(--white);
+  background-color: #4c18a4;
+  color: white;
+  flex: 2;
 }
 
 .dashboard-button.primary:hover {
-  background-color: #3a1580;
+  background-color: #3b1380;
 }
 
-.dashboard-button:not(.primary) {
+.dashboard-button.secondary {
   background-color: #f0f0f0;
-  color: var(--text-color);
+  color: #333;
+  flex: 1;
 }
 
-.dashboard-button:not(.primary):hover {
+.dashboard-button.secondary:hover {
   background-color: #e0e0e0;
 }
 
-.recent-tasks {
-  background-color: #fff;
+.recent-tasks-container {
+  background-color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-.section-header {
+.recent-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.section-header h2 {
+.recent-header h2 {
   margin: 0;
-  color: var(--primary-color);
-  font-size: 20px;
+  color: #4c18a4;
+  font-size: 18px;
+  font-weight: 600;
 }
 
-.view-all-link {
-  color: var(--primary-color);
+.view-all {
+  color: #4c18a4;
   text-decoration: none;
-  font-size: 14px;
   font-weight: 500;
+  font-size: 14px;
 }
 
-.loading-tasks,
-.no-tasks {
+.loading-message,
+.empty-message {
   padding: 30px;
   text-align: center;
   color: #666;
 }
 
-.tasks-table-container {
+.tasks-table-wrapper {
   overflow-x: auto;
 }
 
@@ -213,15 +144,15 @@
 
 .tasks-table th,
 .tasks-table td {
-  padding: 12px 15px;
+  padding: 15px;
   text-align: left;
   border-bottom: 1px solid #eee;
 }
 
 .tasks-table th {
+  color: #666;
   font-weight: 600;
-  color: #444;
-  background-color: #f9f9f9;
+  font-size: 14px;
 }
 
 .task-title-cell {
@@ -229,19 +160,21 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #333;
+  font-weight: 500;
 }
 
 .priority-badge {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .priority-badge.high {
   background-color: #ffebee;
-  color: #d32f2f;
+  color: #e53935;
 }
 
 .priority-badge.medium {
@@ -251,20 +184,20 @@
 
 .priority-badge.low {
   background-color: #e8f5e9;
-  color: #388e3c;
+  color: #43a047;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .status-badge.completed {
   background-color: #e8f5e9;
-  color: #388e3c;
+  color: #43a047;
 }
 
 .status-badge.pending {
@@ -272,46 +205,39 @@
   color: #1976d2;
 }
 
-.view-task-btn {
+.view-details-button {
   display: inline-block;
   padding: 6px 12px;
-  background-color: var(--primary-color);
-  color: var(--white);
+  background-color: #4c18a4;
+  color: white;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 500;
   text-decoration: none;
-  transition: background-color 0.3s;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
-.view-task-btn:hover {
-  background-color: #3a1580;
+.view-details-button:hover {
+  background-color: #3b1380;
 }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .user-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .dashboard-stats {
+  .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
   .dashboard-actions {
     flex-direction: column;
   }
+  
+  .dashboard-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
-  .dashboard-stats {
+  .stats-grid {
     grid-template-columns: 1fr;
   }
 }

@@ -9,9 +9,10 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { TaskProvider } from './context/TaskContext';
 import { HolidayProvider } from './context/HolidayContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import LoadingScreen from './components/LoadingScreen';
 import { checkAndClearToken } from './utils/tokenValidation';
-import './styles/App.css'; // Add a new App.css file
+import './styles/App.css';
 
 function AppRoutes() {
   const { authState, resetAuthState } = useAuth();
@@ -31,6 +32,7 @@ function AppRoutes() {
     };
 
     validateTokenOnStartup();
+    return () => resetAuthState();
   }, [resetAuthState]);
 
   if (isValidating) {
@@ -38,7 +40,10 @@ function AppRoutes() {
   }
 
   return (
+    <>
+    {console.log(authState)}
     <div className="app-wrapper">
+     
       <Routes>
         <Route 
           path="/" 
@@ -71,14 +76,15 @@ function AppRoutes() {
         <Route
           path="/holidays"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <HolidaysPage />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
+    </>
   );
 }
 

@@ -46,7 +46,7 @@ const TaskDetailsPage = () => {
   
   if (taskState.loading) {
     return (
-      <AppLayout title="Task Details" showBackButton={true} backButtonPath="/tasks">
+      <AppLayout title="Task Details">
         <div className="loading-container">Loading task details...</div>
       </AppLayout>
     );
@@ -54,7 +54,7 @@ const TaskDetailsPage = () => {
   
   if (taskState.error) {
     return (
-      <AppLayout title="Task Details" showBackButton={true} backButtonPath="/tasks">
+      <AppLayout title="Task Details">
         <div className="error-container">{taskState.error}</div>
       </AppLayout>
     );
@@ -62,7 +62,7 @@ const TaskDetailsPage = () => {
   
   if (!taskState.task) {
     return (
-      <AppLayout title="Task Details" showBackButton={true} backButtonPath="/tasks">
+      <AppLayout title="Task Details">
         <div className="not-found-container">Task not found</div>
       </AppLayout>
     );
@@ -84,7 +84,7 @@ const TaskDetailsPage = () => {
   };
   
   return (
-    <AppLayout title={pageTitle} showBackButton={true} backButtonPath="/tasks">
+    <AppLayout title={pageTitle}>
       <div className="page-container">
         {!isEditing && (
           <div className="task-actions mb-30 flex gap-10">

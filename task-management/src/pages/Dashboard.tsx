@@ -66,17 +66,18 @@ const Dashboard = () => {
 
   return (
     <AppLayout title="Dashboard">
-      <div className="page-container">
-        <div className="dashboard-welcome mb-30">
-          <h2 className="page-title">Welcome to your task dashboard!</h2>
+      <div className="dashboard-container">
+        <div className="dashboard-welcome">
+          <h2>Welcome to your task dashboard!</h2>
           <p>Here's an overview of your tasks and activities.</p>
         </div>
 
-        <div className="dashboard-stats">
+        <div className="stats-grid">
           <div className="stat-card">
             <h3>Total Tasks</h3>
             <div className="stat-value">{statsSummary.total}</div>
           </div>
+          
           <div className="stat-card">
             <h3>Completed</h3>
             <div className="stat-value">
@@ -88,45 +89,48 @@ const Dashboard = () => {
               </span>
             </div>
           </div>
+          
           <div className="stat-card overdue">
             <h3>Overdue</h3>
             <div className="stat-value">{statsSummary.overdue}</div>
           </div>
+          
           <div className="stat-card">
             <h3>Due Today</h3>
             <div className="stat-value">{statsSummary.dueToday}</div>
           </div>
+          
           <div className="stat-card">
             <h3>High Priority</h3>
             <div className="stat-value">{statsSummary.highPriority}</div>
           </div>
         </div>
 
-        <div className="dashboard-actions mb-30">
-          <Link to="/tasks" className="btn btn-primary">
+        <div className="dashboard-actions">
+          <Link to="/tasks" className="dashboard-button primary">
             View All Tasks
           </Link>
-          <Link to="/tasks" className="btn btn-secondary">
+          <Link to="/tasks" className="dashboard-button secondary">
             Create New Task
           </Link>
         </div>
 
-        <div className="card">
-          <div className="card-header">
-            <h2 className="card-title">Recent Tasks</h2>
-            <Link to="/tasks" className="view-all-link">
+        <div className="recent-tasks-container">
+          <div className="recent-header">
+            <h2>Recent Tasks</h2>
+            <Link to="/tasks" className="view-all">
               View All
             </Link>
           </div>
 
           {taskState.loading ? (
-            <div className="loading-tasks">Loading tasks...</div>
+            <div className="loading-message">Loading tasks...</div>
           ) : recentTasks.length === 0 ? (
-            <div className="no-tasks">
+            <div className="empty-message">
               <p>You have no tasks yet. Create your first task to get started!</p>
             </div>
           ) : (
-            <div className="tasks-table-container">
+            <div className="tasks-table-wrapper">
               <table className="tasks-table">
                 <thead>
                   <tr>
@@ -153,7 +157,7 @@ const Dashboard = () => {
                         </span>
                       </td>
                       <td>
-                        <Link to={`/tasks/${task._id}`} className="view-task-btn">
+                        <Link to={`/tasks/${task._id}`} className="view-details-button">
                           View Details
                         </Link>
                       </td>

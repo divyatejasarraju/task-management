@@ -17,7 +17,7 @@ const TaskForm = ({ taskId, onTaskSaved }: TaskFormProps) => {
   const [formError, setFormError] = useState('');
   
   const { taskState, createTask, getTaskById, updateTask } = useTask();
-  const { holidayState, getHolidays, isHoliday } = useHoliday();
+  const { getHolidays, isHoliday } = useHoliday();
   
   // Fetch holidays when component mounts
   useEffect(() => {
