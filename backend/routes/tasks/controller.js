@@ -1,5 +1,5 @@
-import Task from '../models/taskModel.js';
-import isHoliday from '../utils/isHoliday.js';
+import Task from './model.js';
+import isHoliday from '../../utils/isHoliday.js';
 
 // @desc    Create a new task
 // @route   POST /api/tasks

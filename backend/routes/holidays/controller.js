@@ -1,4 +1,4 @@
-import Holiday from '../models/holidayModel.js';
+import Holiday from './model.js';
 
 // @desc    Add a holiday
 // @route   POST /api/holidays

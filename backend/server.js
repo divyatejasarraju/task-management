@@ -2,9 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
-import userRoutes from './routes/userRoutes.js';
-import taskRoutes from './routes/taskRoutes.js';
-import holidayRoutes from './routes/holidayRoutes.js';
+import userRoutes from './routes/users/index.js';
+import taskRoutes from './routes/tasks/index.js';
+import holidayRoutes from './routes/holidays/index.js';
 
 dotenv.config();
 

@@ -1,4 +1,4 @@
-import Holiday from '../models/holidayModel.js';
+import Holiday from '../routes/holidays/model.js';
 
 const isHoliday = async (date) => {
   // Format the date to match only year-month-day

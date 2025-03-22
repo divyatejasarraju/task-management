@@ -1,6 +1,6 @@
 import express from 'express';
-import { addHoliday, getHolidays, deleteHoliday } from '../controllers/holidayController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+import { addHoliday, getHolidays, deleteHoliday } from './controller.js';
+import { protect, admin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
