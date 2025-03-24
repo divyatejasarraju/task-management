@@ -40,9 +40,7 @@ function AppRoutes() {
   }
 
   return (
-    <>
     <div className="app-wrapper">
-     
       <Routes>
         <Route 
           path="/" 
@@ -83,7 +81,6 @@ function AppRoutes() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </div>
-    </>
   );
 }
 

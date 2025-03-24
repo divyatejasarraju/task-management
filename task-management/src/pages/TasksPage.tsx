@@ -5,6 +5,7 @@ import AppLayout from '../components/layouts/AppLayout';
 import TaskForm from '../components/TaskForm';
 import { useTask } from '../context/TaskContext';
 import { useHoliday } from '../context/HolidayContext';
+import { useAuth } from '../context/AuthContext'; // Added import for auth context
 import '../styles/TasksPage.css';
 
 const TasksPage = () => {
@@ -15,9 +16,14 @@ const TasksPage = () => {
   const [completionStatus, setCompletionStatus] = useState('all');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null); // Added state for delete errors
   
   const { taskState, getTasks, markTaskCompleted, deleteTask } = useTask();
   const { getHolidays } = useHoliday();
+  const { authState } = useAuth(); // Added auth state to check user role
+  
+  // Check if user is admin or validator (has permission to delete)
+  const canDelete = authState.user?.role === 'admin' || authState.user?.role === 'validator';
   
   // Check if we should show the form based on URL parameter
   useEffect(() => {
@@ -81,9 +87,22 @@ const TasksPage = () => {
   };
   
   const handleDeleteTask = async (taskId: string) => {
+    // Clear any previous errors
+    setDeleteError(null);
+    
+    // Check if user has permission to delete
+    if (!canDelete) {
+      setDeleteError("Only administrators and validators can delete tasks");
+      return;
+    }
+    
     if (window.confirm('Are you sure you want to delete this task?')) {
-      await deleteTask(taskId);
-      fetchTasks();
+      try {
+        await deleteTask(taskId);
+        fetchTasks();
+      } catch (error) {
+        setDeleteError("Failed to delete task. You may not have permission.");
+      }
     }
   };
   
@@ -97,6 +116,30 @@ const TasksPage = () => {
   // Group tasks by completion status
   const incomplete = taskState.tasks.filter(task => !task.completed);
   const completed = taskState.tasks.filter(task => task.completed);
+  
+  // Function to render delete button based on permissions
+  const renderDeleteButton = (taskId: string) => {
+    if (canDelete) {
+      return (
+        <button 
+          className="delete-btn" 
+          onClick={() => handleDeleteTask(taskId)}
+        >
+          Delete
+        </button>
+      );
+    } else {
+      return (
+        <button 
+          className="delete-btn disabled" 
+          disabled
+          title="Only administrators and validators can delete tasks"
+        >
+          Delete
+        </button>
+      );
+    }
+  };
   
   return (
     <AppLayout title="Task Management">
@@ -165,6 +208,13 @@ const TasksPage = () => {
               </div>
             </div>
 
+            {/* Display error message if deletion fails */}
+            {deleteError && (
+              <div className="error-message">
+                {deleteError}
+              </div>
+            )}
+
             <div className="task-list-container">
               <div className="task-list-header">
                 <h3>Incomplete Tasks ({incomplete.length})</h3>
@@ -201,12 +251,7 @@ const TasksPage = () => {
                       <Link to={`/tasks/${task._id}`} className="view-details-btn">
                         View Details
                       </Link>
-                      <button 
-                        className="delete-btn" 
-                        onClick={() => handleDeleteTask(task._id)}
-                      >
-                        Delete
-                      </button>
+                      {renderDeleteButton(task._id)}
                     </div>
                   </div>
                 ))
@@ -249,12 +294,7 @@ const TasksPage = () => {
                       <Link to={`/tasks/${task._id}`} className="view-details-btn">
                         View Details
                       </Link>
-                      <button 
-                        className="delete-btn" 
-                        onClick={() => handleDeleteTask(task._id)}
-                      >
-                        Delete
-                      </button>
+                      {renderDeleteButton(task._id)}
                     </div>
                   </div>
                 ))

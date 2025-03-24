@@ -16,10 +16,16 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "paths": {
-      "@/*": ["src/*"]
+      "@src/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
     }
   },
-  "include": ["src"],
+  "include": [
+    "src/**/*",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

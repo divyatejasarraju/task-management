@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTask } from '../context/TaskContext';
+import { useAuth } from '../context/AuthContext'; // Added import for auth context
 import { HolidayProvider } from '../context/HolidayContext';
 import TaskForm from '../components/TaskForm';
 import TaskHistory from '../components/TaskHistory';
@@ -12,11 +13,16 @@ const TaskDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { taskState, getTaskById, markTaskCompleted, deleteTask } = useTask();
+  const { authState } = useAuth(); // Added auth state
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null); // Added state for delete errors
   const [isLoaded, setIsLoaded] = useState(false);
   const [cachedTask, setCachedTask] = useState(null);
   const [fetchedInitially, setFetchedInitially] = useState(false);
+  
+  // Check if user is admin or validator (has permission to delete)
+  const canDelete = authState.user?.role === 'admin' || authState.user?.role === 'validator';
   
   // Only fetch task data on initial load and after operations (not during edits)
   const fetchTaskData = useCallback(async () => {
@@ -64,6 +70,15 @@ const TaskDetailsPage = () => {
   };
   
   const handleDeleteTask = async () => {
+    // Clear any previous errors
+    setDeleteError(null);
+    
+    // Check if user has permission to delete
+    if (!canDelete) {
+      setDeleteError("Only administrators and validators can delete tasks");
+      return;
+    }
+    
     if (isConfirmingDelete) {
       try {
         setIsLoaded(false);
@@ -71,6 +86,8 @@ const TaskDetailsPage = () => {
         navigate('/tasks');
       } catch (error) {
         console.error("Error deleting task:", error);
+        setDeleteError("Failed to delete task. You may not have permission.");
+        setIsConfirmingDelete(false);
         setIsLoaded(true);
       }
     } else {
@@ -162,24 +179,44 @@ const TaskDetailsPage = () => {
             {task.completed ? 'Mark Incomplete' : 'Mark Complete'}
           </button>
           
-          <button
-            className={`task-action-btn ${isConfirmingDelete ? 'confirm-delete-btn' : 'delete-btn'}`}
-            onClick={handleDeleteTask}
-            disabled={isEditing}
-          >
-            {isConfirmingDelete ? 'Confirm Delete' : 'Delete Task'}
-          </button>
-          
-          {isConfirmingDelete && (
+          {/* Conditionally render or disable delete button based on permissions */}
+          {canDelete ? (
+            <>
+              <button
+                className={`task-action-btn ${isConfirmingDelete ? 'confirm-delete-btn' : 'delete-btn'}`}
+                onClick={handleDeleteTask}
+                disabled={isEditing}
+              >
+                {isConfirmingDelete ? 'Confirm Delete' : 'Delete Task'}
+              </button>
+              
+              {isConfirmingDelete && (
+                <button
+                  className="task-action-btn cancel-btn"
+                  onClick={handleCancelDelete}
+                  disabled={isEditing}
+                >
+                  Cancel
+                </button>
+              )}
+            </>
+          ) : (
             <button
-              className="task-action-btn cancel-btn"
-              onClick={handleCancelDelete}
-              disabled={isEditing}
+              className="task-action-btn delete-btn disabled"
+              disabled
+              title="Only administrators and validators can delete tasks"
             >
-              Cancel
+              Delete Task
             </button>
           )}
         </div>
+        
+        {/* Display error message if deletion fails */}
+        {deleteError && (
+          <div className="error-message">
+            {deleteError}
+          </div>
+        )}
         
         <div className="task-detail-card">
           {isEditing ? (

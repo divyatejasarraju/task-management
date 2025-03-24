@@ -13,6 +13,7 @@ interface TaskItemProps {
 
 const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const { taskState, markTaskCompleted, deleteTask, undoTaskChange } = useTask();
   const { authState } = useAuth();
   
@@ -22,11 +23,25 @@ const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
   };
   
   const handleDeleteTask = async () => {
-    if (isConfirmingDelete) {
-      await deleteTask(task._id);
-      onTaskUpdated();
-    } else {
-      setIsConfirmingDelete(true);
+    try {
+      setDeleteError(null);
+      
+      // Check if user has permission to delete
+      if (!canDelete) {
+        setDeleteError("Only administrators and validators can delete tasks");
+        return;
+      }
+      
+      if (isConfirmingDelete) {
+        await deleteTask(task._id);
+        onTaskUpdated();
+      } else {
+        setIsConfirmingDelete(true);
+      }
+    } catch (error) {
+      // Handle the error if deleteTask throws an exception
+      setDeleteError('Failed to delete task. You may not have permission.');
+      setIsConfirmingDelete(false);
     }
   };
   
@@ -35,10 +50,9 @@ const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
     onTaskUpdated();
   };
   
-  // Check if user is admin or validator or task owner
+  // Check if user is admin or validator ONLY (not task owner)
   const canDelete = authState.user?.role === 'admin' || 
-                   authState.user?.role === 'validator' || 
-                   task.user === authState.user?.id;
+                   authState.user?.role === 'validator';
   
   // Determine priority class
   const getPriorityClass = () => {
@@ -110,24 +124,41 @@ const TaskItem = ({ task, onTaskUpdated }: TaskItemProps) => {
           </button>
         )}
         
-        {/* Only show delete button if user has permission */}
-        {canDelete && (
+        {/* Show delete button for admins/validators, show disabled button for regular users */}
+        {canDelete ? (
+          <>
+            <button 
+              className={`btn-delete ${isConfirmingDelete ? 'confirming' : ''}`}
+              onClick={handleDeleteTask}
+              disabled={taskState.loading}
+            >
+              {isConfirmingDelete ? 'Confirm Delete' : 'Delete'}
+            </button>
+            
+            {isConfirmingDelete && (
+              <button 
+                className="btn-cancel"
+                onClick={() => setIsConfirmingDelete(false)}
+              >
+                Cancel
+              </button>
+            )}
+          </>
+        ) : (
           <button 
-            className={`btn-delete ${isConfirmingDelete ? 'confirming' : ''}`}
-            onClick={handleDeleteTask}
-            disabled={taskState.loading}
+            className="btn-delete disabled"
+            disabled
+            title="Only administrators and validators can delete tasks"
           >
-            {isConfirmingDelete ? 'Confirm Delete' : 'Delete'}
+            Delete
           </button>
         )}
         
-        {isConfirmingDelete && (
-          <button 
-            className="btn-cancel"
-            onClick={() => setIsConfirmingDelete(false)}
-          >
-            Cancel
-          </button>
+        {/* Display error message if deletion fails */}
+        {deleteError && (
+          <div className="error-message">
+            {deleteError}
+          </div>
         )}
       </div>
     </div>
