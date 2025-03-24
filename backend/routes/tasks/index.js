@@ -8,7 +8,7 @@ import {
   undoTaskChange, 
   getTaskHistory 
 } from './controller.js';
-import { protect } from '../../middleware/authMiddleware.js';
+import { protect, admin } from '../../middleware/authMiddleware.js';
 
 const router = express.Router();
 
@@ -19,7 +19,7 @@ router.route('/')
 router.route('/:id')
   .get(protect, getTaskById)
   .put(protect, updateTask)
-  .delete(protect, deleteTask);
+  .delete(protect, admin, deleteTask);
 
 router.route('/:id/undo')
   .post(protect, undoTaskChange);

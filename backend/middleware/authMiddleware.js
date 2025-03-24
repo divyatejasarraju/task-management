@@ -27,13 +27,26 @@ const protect = async (req, res, next) => {
   }
 };
 
+
 const admin = (req, res, next) => {
-  if (req.user && (req.user.role === 'admin' || req.user.role === 'validator')) {
-    next();
+  // Check if user exists and has the required role
+  if (!req.user) {
+    return res.status(401).json({ 
+      message: 'Not authenticated',
+      error: 'You need to be logged in to perform this action' 
+    });
+  }
+  
+  if (req.user.role === 'admin' || req.user.role === 'validator') {
+    next(); // User has permission, proceed to the route handler
   } else {
-    res.status(401).json({ message: 'Not authorized as an admin or validator' });
+    res.status(403).json({ 
+      message: 'Permission denied', 
+      error: 'Only administrators and validators can delete tasks' 
+    });
   }
 };
+
 
 export { protect, admin };
 
