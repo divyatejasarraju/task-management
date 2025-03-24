@@ -12,9 +12,8 @@ interface TaskFormProps {
 
 const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
   const { taskState, createTask, updateTask, getTaskById } = useTask();
-  const { holidayState, getHolidays } = useHoliday();
+  const { holidayState, getHolidays, isHoliday } = useHoliday();
   
-  // Initialize form with initialData if provided
   const [formData, setFormData] = useState({
     title: initialData?.title || '',
     description: initialData?.description || '',
@@ -28,18 +27,17 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
   });
   
   const [dateWarning, setDateWarning] = useState('');
+  const [holidayError, setHolidayError] = useState('');
   
-  // Only fetch task data if editing and no initialData provided
   useEffect(() => {
     if (taskId && !initialData) {
       getTaskById(taskId);
     }
     
-    // Always fetch holidays for date validation
+    // Load holidays when component mounts
     getHolidays();
   }, [taskId, initialData]);
   
-  // Set form data from existing task when editing (only if initialData not provided)
   useEffect(() => {
     if (taskId && taskState.task && !initialData) {
       const task = taskState.task;
@@ -49,8 +47,46 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
         priority: task.priority,
         dueDate: format(new Date(task.dueDate), 'yyyy-MM-dd')
       });
+      
+      // Check date warnings for the loaded task
+      if (task.dueDate) {
+        checkDateWarnings(format(new Date(task.dueDate), 'yyyy-MM-dd'));
+      }
     }
   }, [taskId, taskState.task, initialData]);
+  
+  // Check if a date is a holiday
+  const checkIsHoliday = (dateString: string): boolean => {
+    if (!dateString || holidayState.holidays.length === 0) return false;
+    
+    const selectedDate = new Date(dateString);
+    
+    return holidayState.holidays.some(holiday => {
+      const holidayDate = new Date(holiday.date);
+      return (
+        holidayDate.getDate() === selectedDate.getDate() &&
+        holidayDate.getMonth() === selectedDate.getMonth() &&
+        holidayDate.getFullYear() === selectedDate.getFullYear()
+      );
+    });
+  };
+  
+  const getHolidayName = (dateString: string): string => {
+    if (!dateString || holidayState.holidays.length === 0) return '';
+    
+    const selectedDate = new Date(dateString);
+    
+    const holiday = holidayState.holidays.find(h => {
+      const holidayDate = new Date(h.date);
+      return (
+        holidayDate.getDate() === selectedDate.getDate() &&
+        holidayDate.getMonth() === selectedDate.getMonth() &&
+        holidayDate.getFullYear() === selectedDate.getFullYear()
+      );
+    });
+    
+    return holiday ? holiday.name : '';
+  };
   
   const validateForm = (): boolean => {
     let isValid = true;
@@ -71,11 +107,26 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
       isValid = false;
     }
     
+    // Check if due date is a holiday
+    if (formData.dueDate && checkIsHoliday(formData.dueDate)) {
+      const holidayName = getHolidayName(formData.dueDate);
+      setHolidayError(`Cannot create tasks on public holidays (${holidayName})`);
+      isValid = false;
+    } else {
+      setHolidayError('');
+    }
+    
     setFormErrors(errors);
     return isValid;
   };
   
   const checkDateWarnings = (date: string) => {
+    if (!date) {
+      setDateWarning('');
+      setHolidayError('');
+      return;
+    }
+    
     const selectedDate = new Date(date);
     let warning = '';
     
@@ -85,19 +136,16 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
     }
     
     // Check if date is a holiday
-    const isHoliday = holidayState.holidays.some(holiday => {
-      const holidayDate = new Date(holiday.date);
-      return (
-        holidayDate.getDate() === selectedDate.getDate() &&
-        holidayDate.getMonth() === selectedDate.getMonth() &&
-        holidayDate.getFullYear() === selectedDate.getFullYear()
-      );
-    });
+    const isHolidayDate = checkIsHoliday(date);
     
-    if (isHoliday) {
+    if (isHolidayDate) {
+      const holidayName = getHolidayName(date);
+      setHolidayError(`Cannot create tasks on public holidays (${holidayName})`);
       warning = warning 
         ? `${warning} This date is also a holiday.` 
         : 'Selected date is a holiday.';
+    } else {
+      setHolidayError('');
     }
     
     setDateWarning(warning);
@@ -142,8 +190,13 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
       }
       
       onTaskSaved();
-    } catch (error) {
-      console.error('Error saving task:', error);
+    } catch (error: any) {
+      // Handle API errors
+      if (error.response?.data?.message === 'Cannot create tasks on public holidays') {
+        setHolidayError('Cannot create tasks on public holidays. Please select a different date.');
+      } else {
+        console.error('Error saving task:', error);
+      }
     }
   };
   
@@ -151,9 +204,26 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
     let nextWorkday = new Date();
     nextWorkday = addDays(nextWorkday, 1);
     
-    // Find the next non-weekend day
-    while (isWeekend(nextWorkday)) {
-      nextWorkday = addDays(nextWorkday, 1);
+    // Find the next non-weekend, non-holiday day
+    let isValidWorkday = false;
+    let attemptCount = 0;
+    const maxAttempts = 14; // Prevent infinite loop
+    
+    while (!isValidWorkday && attemptCount < maxAttempts) {
+      // Skip weekends
+      while (isWeekend(nextWorkday)) {
+        nextWorkday = addDays(nextWorkday, 1);
+      }
+      
+      // Check if it's a holiday
+      const formattedDate = format(nextWorkday, 'yyyy-MM-dd');
+      if (checkIsHoliday(formattedDate)) {
+        nextWorkday = addDays(nextWorkday, 1);
+      } else {
+        isValidWorkday = true;
+      }
+      
+      attemptCount++;
     }
     
     // Format for input
@@ -220,7 +290,7 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
                 name="dueDate"
                 value={formData.dueDate}
                 onChange={handleChange}
-                className={formErrors.dueDate ? 'error' : ''}
+                className={formErrors.dueDate || holidayError ? 'error' : ''}
               />
               <button 
                 type="button" 
@@ -231,6 +301,7 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
               </button>
             </div>
             {formErrors.dueDate && <span className="error-message">{formErrors.dueDate}</span>}
+            {holidayError && <span className="error-message holiday-error">{holidayError}</span>}
             {dateWarning && <span className="warning-message">{dateWarning}</span>}
           </div>
         </div>
@@ -239,7 +310,7 @@ const TaskForm = ({ taskId, onTaskSaved, initialData }: TaskFormProps) => {
           <button 
             type="submit" 
             className="save-btn"
-            disabled={taskState.loading}
+            disabled={taskState.loading || !!holidayError}
           >
             {taskState.loading ? 'Saving...' : 'Save Task'}
           </button>
