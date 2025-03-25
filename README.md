@@ -293,6 +293,7 @@ task-management/
 
   - API calls being triggered twice in development environment
   - Mobile Responsive UI not tested
+  - Upon editing a task the history is not updated immediately
  
 
 ## Technical Debt
