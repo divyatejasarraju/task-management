@@ -21,6 +21,28 @@ export interface AuthContextType {
   resetAuthState: () => void;
 }
 
+export interface TaskState {
+  tasks: Task[];
+  loading: boolean;
+  error: string | null;
+  success: boolean;
+  task: Task | null; 
+  history: TaskChange[]; 
+}
+
+export interface TaskContextType {
+  taskState: TaskState;
+  createTask: (taskData: Partial<Task>) => Promise<void>;
+  getTasks: (filters?: TaskFilter) => Promise<void>;
+  getTaskById: (taskId: string) => Promise<void>;
+  updateTask: (taskId: string, taskData: Partial<Task>) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  markTaskCompleted: (taskId: string, completed: boolean) => Promise<void>;
+  resetTaskState: () => void;
+  undoTaskChange: (taskId: string) => Promise<void>;
+  getTaskHistory: (taskId: string) => Promise<TaskChange[]>; // Add this line
+}
+
 export interface Task {
   _id: string;
   title: string;
@@ -56,3 +78,4 @@ export interface TaskFilter {
   endDate?: string;
   completed?: boolean | null;
 }
+

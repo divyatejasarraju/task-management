@@ -85,7 +85,7 @@ const holidayReducer = (state: HolidayState, action: HolidayAction): HolidayStat
 };
 
 // Create context
-const HolidayContext = createContext<HolidayContextType | undefined>(undefined);
+export const HolidayContext = createContext<HolidayContextType | undefined>(undefined);
 
 // Provider component
 export const HolidayProvider = ({ children }: { children: ReactNode }) => {

@@ -26,6 +26,7 @@ interface TaskContextType {
   resetTaskState: () => void;
 }
 
+
 // Initial state
 const initialState: TaskState = {
   tasks: [],
@@ -102,7 +103,7 @@ const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
 };
 
 // Create context
-const TaskContext = createContext<TaskContextType | undefined>(undefined);
+export const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 // Provider component
 export const TaskProvider = ({ children }: { children: ReactNode }) => {

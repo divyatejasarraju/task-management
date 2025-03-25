@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import SignInForm from '../../../components/SignInForm';
+import SignInForm from '../../components/SignInForm';
 
 // Mock dependencies
-jest.mock('../../../context/AuthContext', () => ({
+jest.mock('../../context/AuthContext', () => ({
   useAuth: jest.fn()
 }));
 
@@ -21,7 +21,7 @@ describe('SignInForm Component', () => {
     jest.clearAllMocks();
     
     // Default mock implementations
-    const { useAuth } = require('../../../context/AuthContext');
+    const { useAuth } = require('../../context/AuthContext');
     useAuth.mockReturnValue({
       authState: {
         isLoading: false,
@@ -77,7 +77,7 @@ describe('SignInForm Component', () => {
   });
   
   test('disables submit button when loading', () => {
-    const { useAuth } = require('../../../context/AuthContext');
+    const { useAuth } = require('../../context/AuthContext');
     useAuth.mockReturnValue({
       authState: {
         isLoading: true,
@@ -94,7 +94,7 @@ describe('SignInForm Component', () => {
   });
   
   test('displays error message when authentication fails', () => {
-    const { useAuth } = require('../../../context/AuthContext');
+    const { useAuth } = require('../../context/AuthContext');
     useAuth.mockReturnValue({
       authState: {
         isLoading: false,
@@ -115,7 +115,7 @@ describe('SignInForm Component', () => {
     render(<SignInForm switchToSignUp={mockSwitchToSignUp} />);
     
     // After submitting form, mock successful authentication
-    const { useAuth } = require('../../../context/AuthContext');
+    const { useAuth } = require('../../context/AuthContext');
     useAuth.mockReturnValue({
       authState: {
         isLoading: false,

@@ -81,7 +81,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 };
 
 // Create context
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Provider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
