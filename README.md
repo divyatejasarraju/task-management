@@ -294,6 +294,7 @@ task-management/
   - API calls being triggered twice in development environment
   - Mobile Responsive UI not tested
   - Upon editing a task the history is not updated immediately
+  - The calendar doesnt disable the previous dates and user can still add the tasks
  
 
 ## Technical Debt
