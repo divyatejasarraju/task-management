@@ -1,0 +1,62 @@
+Arguments: 
+  /opt/homebrew/Cellar/node/23.10.0_1/bin/node /usr/local/bin/yarn add -D @babel/core @babel/preset-env @babel/preset-react @babel/preset-typescript identity-obj-proxy babel-jest
+
+PATH: 
+  /opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin
+
+Yarn version: 
+  1.22.11
+
+Node version: 
+  23.10.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  Error: test:watch: Invalid protocol: test:
+      at module.exports.Request.init (/usr/local/lib/node_modules/yarn/lib/cli.js:141032:31)
+      at new Request (/usr/local/lib/node_modules/yarn/lib/cli.js:140705:8)
+      at request (/usr/local/lib/node_modules/yarn/lib/cli.js:137611:10)
+      at RequestManager.execute (/usr/local/lib/node_modules/yarn/lib/cli.js:67044:15)
+      at RequestManager.shiftQueue (/usr/local/lib/node_modules/yarn/lib/cli.js:67082:10)
+      at /usr/local/lib/node_modules/yarn/lib/cli.js:66751:13
+      at new Promise (<anonymous>)
+      at F (/usr/local/lib/node_modules/yarn/lib/cli.js:5301:28)
+      at RequestManager.request (/usr/local/lib/node_modules/yarn/lib/cli.js:66749:19)
+      at NpmRegistry.<anonymous> (/usr/local/lib/node_modules/yarn/lib/cli.js:31708:42)
+
+npm manifest: 
+  {
+    "devDependencies": {
+      "@babel/preset-env": "^7.26.9",
+      "@babel/preset-react": "^7.26.3",
+      "@babel/preset-typescript": "^7.26.0",
+      "@testing-library/jest-dom": "^6.6.3",
+      "@testing-library/react": "^16.2.0",
+      "@testing-library/user-event": "^14.6.1",
+      "@types/jest": "^29.5.14",
+      "identity-obj-proxy": "^3.0.0",
+      "jest": "^29.7.0",
+      "jest-environment-jsdom": "^29.7.0",
+      "jest-fetch-mock": "^3.0.3",
+      "jest-localstorage-mock": "^2.4.26",
+      "msw": "^2.7.3",
+      "ts-jest": "^29.2.6",
+      "test": "jest",
+      "test:watch": "jest --watch",
+      "test:coverage": "jest --coverage"
+    },
+    "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+    
+  }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
